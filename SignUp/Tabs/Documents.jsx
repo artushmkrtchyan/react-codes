@@ -1,14 +1,57 @@
-import React, { Component } from 'react'
-import { Row, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import React, { Component } from 'react';
+import { connect } from "react-redux";
+import Actions from "Redux/Actions";
+import { Row, FormGroup, FormControl, ControlLabel, Alert } from 'react-bootstrap';
+import _ from 'lodash';
+import Service from '../../../Services/Api';
 
 
-export default class Documents extends Component {
+class Documents extends Component {
+
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			error: '',
+		}
+	}
+
+	uploadDocument = e => {
+		let { error } = this.state
+		const name = e.target.name;
+		const form = new FormData();
+		form.append('image', e.target.files[0])
+		form.append('type', 'File')
+		form.append('document_type', name)
+		Service.create().uploadDocument(form)
+		.then( res => {
+			if(res.data.data){
+				this.props.fetchUserRequest()
+				error = ''
+				this.setState({error: error })
+			}else{
+				error = res.data.meta.message
+				this.setState({error: error })
+			}
+		})
+	}
 
 	render() {
 
 		const {
-			handleChange,
-		} = this.props
+			uploadDocument,
+			props,
+		} = this
+
+		const {
+			error,
+		} = this.state
+
+		const { user: { documents } } = props
+
+		const professional_license = _.find(documents, ['document_type', 'professional_license'])
+		const business_license = _.find(documents, ['document_type', 'business_license'])
+		const liability_insurance = _.find(documents, ['document_type', 'liability_insurance'])
 
 		return(
 			<div className="documents">
@@ -17,19 +60,50 @@ export default class Documents extends Component {
 	  			</Row>
 				<FormGroup>
 					<ControlLabel>Professional License</ControlLabel>
-				    <FormControl name="professionalLicense" type="file" onChange={ handleChange } />
+				    
+				    { professional_license ?
+				    	<div><img alt="" src={professional_license.thumbnail} /></div>
+				    	:
+				    	<FormControl name="professional_license" type="file" onChange={ uploadDocument } />
+				    }
 				</FormGroup>
 
 				<FormGroup>
 					<ControlLabel>Business License</ControlLabel>
-				    <FormControl name="businessLicense" type="file" onChange={ handleChange } />
+				    { business_license ?
+				    	<div><img alt="" src={business_license.thumbnail} /></div>
+				    	:
+				    	<FormControl name="business_license" type="file" onChange={ uploadDocument } />
+				    }
 				</FormGroup>
 
 				<FormGroup>
 					<ControlLabel>Liability Insurance Summary</ControlLabel>
-				    <FormControl name="liabilityInsurance" type="file" onChange={ handleChange } />
+				    { liability_insurance ?
+				    	<div><img alt="" src={liability_insurance.thumbnail} /></div>
+				    	:
+				    	<FormControl name="liability_insurance" type="file" onChange={ uploadDocument } />
+				    }
 				</FormGroup>
+				{ error ?
+					<Alert bsStyle="danger">{ error }</Alert>
+				:
+					''
+				}
 			</div>
 		)
 	}
 }
+
+const mapStateToProps = state => ({
+	user: state.user
+});
+
+const mapDispatchToProps = dispatch => ({
+	fetchUserRequest: payload =>
+		new Promise((resolve, reject) =>
+			dispatch(Actions.fetchUser(payload, resolve, reject))
+		)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Documents);

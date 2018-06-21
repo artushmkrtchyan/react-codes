@@ -1,14 +1,22 @@
 import React, { Component } from 'react'
+import { connect } from "react-redux";
 import {Row, Col, FormGroup, FormControl } from 'react-bootstrap';
 
 
-export default class BankAccount extends Component {
+class BankAccount extends Component {
 
 	render() {
 
 		const {
 			handleChange,
+			user,
 		} = this.props
+
+		const {
+			first_name,
+			last_name,
+		} = user
+
 
 		return(
 			<div className="bankAccount">
@@ -22,12 +30,22 @@ export default class BankAccount extends Component {
 		  			</Col>
 		  			<Col md={6}>
 						<FormGroup>
-						    <FormControl name="first-name" type="text" placeholder="First Name" onChange={ handleChange }  />
+						    {
+						    	first_name.length > 0 ?
+						    	<FormControl name="first_name" defaultValue={ first_name } type="text" placeholder="First Name" onChange={ handleChange } />
+						    	:
+						    	<FormControl name="first_name" type="text" placeholder="First Name" onChange={ handleChange } />
+						    }
 						</FormGroup>
 					</Col>
 					<Col md={6}>
 						<FormGroup>
-						    <FormControl name="last-name"  type="text" placeholder="Last Name" onChange={ handleChange }  />
+						    {
+						    	last_name.length > 0 ?
+						    	<FormControl name="last_name" defaultValue={ last_name } type="text" placeholder="Last Name" onChange={ handleChange } />
+						    	:
+						    	<FormControl name="last_name" type="text" placeholder="Last Name" onChange={ handleChange } />
+						    }
 						</FormGroup>
 					</Col>
 				</Row>
@@ -50,7 +68,23 @@ export default class BankAccount extends Component {
 				</Row>
 
 				<FormGroup>
-				    <FormControl name="business-address" type="text" placeholder="Business Address" onChange={ handleChange }  />
+				    <FormControl name="address" type="text" placeholder="Business Address" onChange={ handleChange }  />
+				</FormGroup>
+
+				<FormGroup>
+				    <FormControl name="address_2" type="text" placeholder="Business Address 2" onChange={ handleChange }  />
+				</FormGroup>
+
+				<FormGroup>
+				    <FormControl name="city" type="text" placeholder="City" onChange={ handleChange }  />
+				</FormGroup>
+
+				<FormGroup>
+				    <FormControl name="state" type="text" placeholder="state" onChange={ handleChange }  />
+				</FormGroup>
+
+				<FormGroup>
+				    <FormControl name="postal-code" type="text" placeholder="Postal Code" onChange={ handleChange }  />
 				</FormGroup>
 
 			    <FormGroup>
@@ -64,3 +98,10 @@ export default class BankAccount extends Component {
 		)
 	}
 }
+
+const mapStateToProps = state => ({
+	user: state.user
+})
+const mapDispatchToProps = dispatch => ({})
+
+export default connect(mapStateToProps, mapDispatchToProps)(BankAccount);
